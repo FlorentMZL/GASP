@@ -2,19 +2,23 @@
 open Parser
 }
 
-let lettre = ['0'-'9''a'-'z''A'-'Z']
+let layout = [ ' ' '\t' '\n' ]
+let lettres = [ 'a'-'z''A'-'Z''1'-'9' ]
 
-rule main = parse 
-    | lettre as l                   { LETTRE (l)}
-    | '('                           { LPAREN }
-    | ')'                           { RPAREN }
-    | ','                           { VIRGULE }
-    | ';'                           { POINTVIRGULE }
-    | "input symbols:"              { INPUTSYMB }
-    | "stack symbols:"              { STACKSYMB }
-    | "states:"                     { STATES }
-    | "initial state:"              { INITSTATE }  
-    | "initial stack symbol:"       { INITSTACKSYMB }
-    | "transitions:"                { TRANS }
-    | eof                           { EOF }
-    | _                { failwith "unexpected character" }
+(*Définition des tokens *)
+
+rule main = parse
+  | layout		{ main lexbuf } (*?*)
+  | "input symbols :"       { INPUTSYMB }
+  | "transitions :"         { TRANS }
+  | "stack symbols :"       { STACKSYMB}
+  | "states :"              { STATES}
+  | "initial state :"       { INITSTATE }
+  | "initial stack :"       { INITSTACKSYMB }
+  | ')'			                { RPAREN }
+  | '('			                { LPAREN }
+  | ","		                  { VIRGULE }
+  | ";"                     { POINTVIRGULE }
+  | lettres as l            { LETTRE (l) }
+  | eof			                { EOF }
+  | _			                  { failwith "unexpected character" }

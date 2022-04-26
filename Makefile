@@ -32,7 +32,7 @@ parser.mly: ast.ml
 lexer.mll: parser.ml
 
 clean:
-	rm -fr parser.mli parser.ml lexer.ml *.cmo parser *.cmi *~ *.automaton *.conflicts
+	rm -fr parser.ml parser.mli lexer.ml *.cmo parser *.cmi *~ *.automaton *.conflicts
 
 parser.cmo: ast.cmo parser.cmi
 lexer.cmo: parser.cmo
