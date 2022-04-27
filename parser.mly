@@ -2,8 +2,12 @@
 open Ast
 %}
 
-%token RPAREN LPAREN INPUTSYMB STACKSYMB STATES INITSTATE INITSTACKSYMB VIRGULE POINTVIRGULE
-%token TRANS EOF EPSILON
+%token RPAREN LPAREN I
+%token INPUTSYMB STACKSYMB STATES 
+%token INITSTATE INITSTACKSYMB 
+%token VIRGULE POINTVIRGULE
+%token TRANS 
+%token EOF END
 %token<char> LETTRE
 
 %start<Ast.automaton> input
@@ -11,14 +15,14 @@ open Ast
 %%
 
 (*On veut renvoyer un objet de type automate*)
-input: c=automaton EOF { c } 
+input: c=automaton END EOF { c } 
 
 (* type automaton = declaration*transitions *)
 automaton: 
-    d=declaration t=transitions  { (d, t) }
+    d=declarations t=transitions  { (d, t) }
 
 (*type declaration = inputsymb*stacksymb*states*char*char *)
-declaration : 
+declarations : 
     i=inputsymbols s=stacksymbol st=states 
     ini=initialstate init=initialstack
                                   { (i, s, st, ini, init) }
