@@ -14,7 +14,7 @@ rule read = parse
   | "stack symbols:"       { STACKSYMB}
   | "states:"              { STATES}
   | "initial state:"       { INITSTATE }
-  | "initial stack:"       { INITSTACKSYMB }
+  | "initial stack symbol:"{ INITSTACKSYMB }
   | ')'			                { RPAREN }
   | '('			                { LPAREN }
   | ","		                  { VIRGULE }

@@ -19,16 +19,18 @@ type automaton = declaration*transitions;;
 
 let rec list_as_string = function 
   | [] -> ""
-  | c::l -> (Char.escaped c)^(list_as_string l)
+  | [c] -> (Char.escaped c)
+  | c::l -> (Char.escaped c)^", "^(list_as_string l)
 ;;
 
 let rec stack_as_string = function 
-  | []-> ""
-  | c::l -> (Char.escaped c)^";"^stack_as_string l
+  | [] -> ""
+  | [c] -> (Char.escaped c)
+  | c::l -> (Char.escaped c)^";"^(stack_as_string l)
 ;;
 
 let trans_as_string = function
-  |(a,None,c,d,s ) -> "("^(Char.escaped a)^", ,"^(Char.escaped c)^","^(Char.escaped d)^","^(stack_as_string s)^")\n"
+  |(a,None,c,d,s ) -> "("^(Char.escaped a)^",,"^(Char.escaped c)^","^(Char.escaped d)^","^(stack_as_string s)^")\n"
   |(a,Some(b),c,d,s ) ->"("^(Char.escaped a)^","^(Char.escaped b)^","^(Char.escaped c)^","^(Char.escaped d)^","^(stack_as_string s)^")\n"
 ;;
 
@@ -42,10 +44,10 @@ let rec transitions_as_string = function
 let declaration_as_string = function 
 (l1, l2, l3, c1, c2) -> 
   "input symbols: "^(list_as_string l1)^"\n"^
-  "stack symbols: "^(list_as_string l2 )^"\n"^
+  "stack symbols: "^(list_as_string l2)^"\n"^
   "states: "^(list_as_string l3)^"\n"^
   "initial state: "^(Char.escaped c1)^"\n"^
-  "initial stack: "^(Char.escaped c2)^"\n"
+  "initial stack symbol: "^(Char.escaped c2)^"\n"
 ;;
 
 let automaton_as_string = function 
