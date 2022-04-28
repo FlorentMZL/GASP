@@ -4,6 +4,6 @@
 
 ```make```
 
-## Lancement 
+## Lancement
 
 ```./parser < MonFichier```

@@ -1,13 +1,13 @@
 
-(* Définition de types *)
+(**** Définition de types ****)
 
 type inputsymb = char list;;
 type states = char list;;
 type stack = char list;;
 type stacksymb = char list;;
 
-(*correspond à l'ordre des déclarations de l'exemple*)
 type declaration = inputsymb*stacksymb*states*char*char;;
+(*correspond à l'ordre des déclarations de l'exemple*)
 
 type trans= char*(char option)*char*char*stack;;
 type transitions = trans list;;
@@ -15,14 +15,16 @@ type transitions = trans list;;
 type automaton = declaration*transitions;;
 
 
-(* Fonctions d'affichage *)
+(**** Fonctions d'affichage ****)
 
+(* [a;b;c] est affiché comme : a, b, c *)
 let rec list_as_string = function 
   | [] -> ""
   | [c] -> (Char.escaped c)
   | c::l -> (Char.escaped c)^", "^(list_as_string l)
 ;;
 
+(* [A;B;C] est affiché comme : A;B;C *)
 let rec stack_as_string = function 
   | [] -> ""
   | [c] -> (Char.escaped c)
@@ -30,12 +32,10 @@ let rec stack_as_string = function
 ;;
 
 let trans_as_string = function
-  |(a,None,c,d,s ) -> "("^(Char.escaped a)^",,"^(Char.escaped c)^","^(Char.escaped d)^","^(stack_as_string s)^")\n"
-  |(a,Some(b),c,d,s ) ->"("^(Char.escaped a)^","^(Char.escaped b)^","^(Char.escaped c)^","^(Char.escaped d)^","^(stack_as_string s)^")\n"
+  |(a,None,c,d,s) -> "("^(Char.escaped a)^",,"^(Char.escaped c)^","^(Char.escaped d)^","^(stack_as_string s)^")\n"
+  |(a,Some(b),c,d,s) ->"("^(Char.escaped a)^","^(Char.escaped b)^","^(Char.escaped c)^","^(Char.escaped d)^","^(stack_as_string s)^")\n"
 ;;
 
-(*Remarque : peut etre afficher avec un espace les transitions concernant des
-états différents*)
 let rec transitions_as_string = function
   |[] -> ""
   |t::l -> (trans_as_string t)^(transitions_as_string l)
@@ -50,9 +50,44 @@ let declaration_as_string = function
   "initial stack symbol: "^(Char.escaped c2)^"\n"
 ;;
 
+(*Fonction générale d'affichage d'un automate*)
 let automaton_as_string = function 
   (d, s) -> 
     (declaration_as_string d)^"\n"^
     "transitions: \n\n"^
     (transitions_as_string s)
 ;;
+
+
+(**** Fonctions d'évaluation ****)
+
+type word = char list;;
+
+type config = char*stack*word;;
+
+
+(*TODO : il faut peut etre faire les tables d'action et 
+   de transitions pour savoir quoi faire? 
+   finalement pas : on regarde la premiere lettre 
+   et le haut de la pile pour décider*)
+
+(*TODO :
+    il faut peut etre mettre le mot dans une liste au départ?
+    String.split_on_char '' lemot
+    *)
+
+
+(* Applique la transition tr à la configuration cf *)
+let apply_transition cf tr =
+  cf (*TODO*)
+;;
+
+(* Trouve la transition à appliquer : on parcours la liste du haut 
+   vers le bas et on prend la première transition qui s'applique*)
+let find_transition cf trs  =
+  cf(*TODO*)
+;;
+
+
+
+
