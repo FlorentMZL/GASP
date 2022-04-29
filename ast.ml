@@ -79,15 +79,32 @@ type config = char*stack*word;;
 
 (* Applique la transition tr à la configuration cf *)
 let apply_transition cf tr =
-  cf (*TODO*)
+  match (cf, tr) with 
+  |(q,l1,m),(q1,Some a,x,q2,alph) ->(q2,(List.hd l1)::alph, List.tl m) 
+  |(q,l1,m), (q1, None, x, q2, alph)-> (q2, (List.hd l1)::alph, m)
 ;;
 
 (* Trouve la transition à appliquer : on parcours la liste du haut 
    vers le bas et on prend la première transition qui s'applique*)
-let find_transition cf trs  =
-  cf(*TODO*)
+let rec find_transition cf trs  =
+  let (q, s, w) = cf in 
+  match trs with 
+  |[]-> failwith("Pas de transition") (*il faudrait peut etre  gérer ça autrement *)
+  |(q1, Some a, x, q2, alpha)::h when q1 = q && List.tl s = x ->  List.hd trs
+  |(q1, None, x,q2, alpha)::h when q1 = q && List.tl s = x -> List.hd trs
+  |_::h-> find_transition cf h
 ;;
 
+let rec lecture_mot autom cf = 
 
+  match cf with 
+|(q, [], [])  -> print_string("mot accepté"); 
+|(q, [], l)-> print_string ("mot refusé. Pile vide mais entrée non vide")
+|(q, x, [])-> print_string ("mot refusé. Entrée vide mais pile non vide")
+|(q,x,m) -> let (_, tr) = autom in let t = find_transition (q,x,m) tr in let app = apply_transition (q,x,m) t in 
+lecture_mot autom app  
+
+
+;;
 
 
