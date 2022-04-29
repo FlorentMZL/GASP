@@ -58,7 +58,16 @@ let automaton_as_string = function
     (transitions_as_string s)
 ;;
 
+(*Fonction pour les listes*)
 
+(* il faut une  fonction pour convertir un mot en liste de char*)
+
+
+let rec list_last l = 
+  match l with 
+  |[x]->x
+  |h::t -> list_last t
+  |[]-> failwith("liste vide")
 (**** Fonctions d'évaluation ****)
 
 type word = char list;;
@@ -90,8 +99,8 @@ let rec find_transition cf trs  =
   let (q, s, w) = cf in 
   match trs with 
   |[]-> failwith("Pas de transition") (*il faudrait peut etre  gérer ça autrement *)
-  |(q1, Some a, x, q2, alpha)::h when q1 = q && List.tl s = x ->  List.hd trs
-  |(q1, None, x,q2, alpha)::h when q1 = q && List.tl s = x -> List.hd trs
+  |(q1, Some a, x, q2, alpha)::h when q1 = q && list_last s = x ->  List.hd trs
+  |(q1, None, x,q2, alpha)::h when q1 = q && list_last s = x -> List.hd trs
   |_::h-> find_transition cf h
 ;;
 
@@ -102,7 +111,8 @@ let rec lecture_mot autom cf =
 |(q, [], l)-> print_string ("mot refusé. Pile vide mais entrée non vide")
 |(q, x, [])-> print_string ("mot refusé. Entrée vide mais pile non vide")
 |(q,x,m) -> let (_, tr) = autom in let t = find_transition (q,x,m) tr in let app = apply_transition (q,x,m) t in 
-lecture_mot autom app  
+lecture_mot autom app
+  
 
 
 ;;
