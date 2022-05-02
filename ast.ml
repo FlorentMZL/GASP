@@ -83,8 +83,41 @@ let rec list_last l =
 
 type word = string list;;
 type config = char*stack*word;; (*état, pile, reste entrée*)
+(* Verification de la bonne formation de l'automate *)
 
-(* Mise à jour du haut de la pile *)
+let verifAutomate aut = 
+  let (d,_) = aut in let (_,ssymb, sts, initst, initstack) = d in 
+  if List.mem initstack ssymb && List.mem initst sts then true 
+  else false
+;;
+
+(*on verifie si on peut arriver a deux configurations avec 1 transition*)
+let rec verifTransiDet t l = 
+  let (a,b,c,d,e) = t in match l with 
+  |[]->true
+  
+  (*Si il y a la meme lettre dans les deux transition*)
+  |(a1,b1,c1,d1,e1)::q when
+  
+     (a1 = a && b1 = b && c1 = c && (d != d1 || e != e1)) 
+  (*si il n'y a pas de lettre ou alors 1 lettre dans une transition et epsilon dans l'autre transition..*)
+  || (a1 = a && ((b1 !=None && b = None)||(b1 = None && b != None)) && c1 = c && (d != d1|| e!=e1))
+  (*si il y a 2 epsilon*)
+  || (a1 = a && (b1 = None || b = None) && c1 = c)-> false
+
+  (*Sinon on verifie avec l'élement d'après et on rappelle la fonction sur la transition suivante*)
+  |(a1,b1,c1,d1,e1)::q -> verifTransiDet t q && verifTransiDet (List.hd q) l  
+;;  
+
+
+
+
+let verifDeterministe aut = 
+  let (_,t) = aut in let a = List.hd t in verifTransiDet a t 
+;;
+
+
+  (* Mise à jour du haut de la pile *)
 let change_stack s n =
     (*on retire le haut de la pile*)
     let s = match s with h::s -> s | [] -> failwith "transition impossible" in
