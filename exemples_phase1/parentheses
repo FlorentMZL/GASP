@@ -1,0 +1,16 @@
+
+input symbols: g, d
+stack symbols: Z, A
+states: 1
+initial state: 1
+initial stack symbol: Z
+
+transitions:
+
+(1,g,Z,1,Z;A)
+(1,g,A,1,A;A)
+(1,d,A,1,)
+(1,,Z,1,)
+
+
+end 

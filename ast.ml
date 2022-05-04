@@ -79,6 +79,7 @@ let rec list_last l =
   |h::t -> list_last t
   |[]-> failwith("liste vide")
 ;;
+
 (**** Fonctions d'évaluation ****)
 
 type word = string list;;
@@ -110,19 +111,54 @@ let rec verifTransiDet t l =
 ;;  
 
 
-
-
 let verifDeterministe aut = 
   let (_,t) = aut in let a = List.hd t in verifTransiDet a t 
 ;;
 
+(**** Fonctions de lecture d'un mot ****)
 
-  (* Mise à jour du haut de la pile *)
-let change_stack s n =
-    (*on retire le haut de la pile*)
-    let s = match s with h::s -> s | [] -> failwith "transition impossible" in
-    (*on ajoute les nouveaux éléments en haut de la pile*)
-    List.rev_append n s
+(* Le sommet de la pile correspond avec le symbole de 
+   pile pour effectuer la transition *)
+let equal_stack_head stack h =
+  match stack with 
+  |[] -> false
+  |x::s -> x=h
+;;
+
+(* On compare la première lettre de l'entrée avec le caractère de 
+   la transition *)
+let equal_first_letter word c =
+ equal_stack_head word c
+;;
+
+
+(* Trouve la transition à appliquer : on parcours la liste du haut 
+   vers le bas et on prend la première transition qui s'applique.*)
+
+let rec find_transition cf trs  =
+  let (etat, pile, mot) = cf in 
+  match trs with 
+  (*Aucune transition ne convient*)
+  |[]-> None
+  (*Transition avec une lettre consommée*)
+  |(q1, Some a, h, q2, n)::_ when q1 = etat && (equal_stack_head pile h) 
+                                  && (equal_first_letter mot a)
+    ->  let t = (q1, Some a, h, q2, n) 
+  in print_string (trans_as_string t); Some t
+  (*Transition epsilon*)
+  |(q1, None, h,q2, n)::_ when q1 = etat && (equal_stack_head pile h) 
+    -> let t = (q1, None, h,q2, n)
+  in print_string (trans_as_string t); Some t
+  |_::h-> find_transition cf h
+;;
+
+
+(* Mise à jour du haut de la pile *)
+let change_stack stack n =
+  (*on retire le haut de la pile*)
+  let s = match stack with h::s -> s | [] -> failwith "transition impossible, la pile est vide" in
+  (*on ajoute les nouveaux éléments en haut de la pile*)
+  List.rev_append n s
 ;;
 
 (* Applique la transition tr à la configuration cf. 
@@ -135,44 +171,17 @@ let apply_transition cf tr =
   |(_,s,w), (_, None,_,q,n)-> (q,(change_stack s n), w) (*epsilon transition*)
 ;;
 
-let equal_stack_head s h =
-  match s with 
-  |[] -> false
-  |x::s -> x=h
-;;
-
-let equal_word_char w c =
-  match w with
-  |[]-> false
-  |x::w -> x=c
-;;
-
-(* Trouve la transition à appliquer : on parcours la liste du haut 
-   vers le bas et on prend la première transition qui s'applique*)
-
-let rec find_transition cf trs  =
-  let (q, s, w) = cf in 
-  match trs with 
-  |[]-> None
-  |(q1, Some a, h, q2, n)::_ when q1 = q && (equal_stack_head s h) 
-                                  && (equal_word_char w a)
-    ->  Some (q1, Some a, h, q2, n)
-  |(q1, None, h,q2, n)::_ when q1 = q && (equal_stack_head s h) 
-    -> Some (q1, None, h,q2, n)
-  |_::h-> find_transition cf h
-;;
-
 (* Fonction de lecture d'un mot dans un automate acceptant par pile vide*)
 
 let rec lecture_mot autom cf = 
   match cf with 
-|(q, [], [])  -> print_string("mot accepté"); 
-|(q, [], l)-> print_string ("mot refusé. Pile vide mais entrée non vide")
-|(q, x, [])-> print_string ("mot refusé. Entrée vide mais pile non vide")
+|(q, [], [])  -> print_string("mot accepté\n"); 
+|(q, [], l)-> print_string ("mot refusé. Pile vide mais entrée non vide\n")
+(*|(q, x, [])-> print_string ("mot refusé. Entrée vide mais pile non vide\n")*)
 |(q,x,m) -> let (_, tr) = autom in 
   let t' = find_transition (q,x,m) tr in 
   match t' with 
-  |None -> print_string("mot refusé. Pas de transition")
+  |None -> print_string("mot refusé. Pas de transition\n")
   |Some t -> let app = apply_transition (q,x,m) t in 
    lecture_mot autom app
 ;;
