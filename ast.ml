@@ -61,6 +61,18 @@ let automaton_as_string = function
     (transitions_as_string s)
 ;;
 
+let rec word_as_string = function
+  |[]-> ""
+  |c::w-> (Char.escaped c)^word_as_string w
+;;
+
+let configuration_as_string = function
+(q,stack,word) -> 
+  "Etat: "^(Char.escaped q)^" Pile: "^(stack_as_string stack)^
+  "\nReste: "^(word_as_string word)^"\n"
+;;
+  
+
 (**** Fonction pour les listes ****)
 
 (* fonction pour convertir un mot en liste de char *)
@@ -82,15 +94,24 @@ let rec list_last l =
 
 (**** Fonctions d'évaluation ****)
 
-type word = string list;;
-type config = char*stack*word;; (*état, pile, reste entrée*)
-(* Verification de la bonne formation de l'automate *)
 
+let rec in_list e l=
+  match l with
+  | [] -> false
+  | x::l -> if e=x then true else in_list e l
+;;
+
+
+(* Verification de la bonne formation de l'automate 
+   On s'interesse à la partie des déclarations : 
+   le symbole de pile initial doit etre parmi les symboles de piles
+   de même pour létat initial *)
 let verifAutomate aut = 
   let (d,_) = aut in let (_,ssymb, sts, initst, initstack) = d in 
-  if List.mem initstack ssymb && List.mem initst sts then true 
-  else false
+  in_list initstack ssymb && in_list initst sts 
 ;;
+
+(*TODO  enlever les List.hd : gérer le cas vide *)
 
 (*on verifie si on peut arriver a deux configurations avec 1 transition*)
 let rec verifTransiDet t l = 
@@ -173,15 +194,18 @@ let apply_transition cf tr =
 
 (* Fonction de lecture d'un mot dans un automate acceptant par pile vide*)
 
-let rec lecture_mot autom cf = 
+let rec lecture_mot autom cf =
+  print_string (configuration_as_string cf);
   match cf with 
 |(q, [], [])  -> print_string("mot accepté\n"); 
 |(q, [], l)-> print_string ("mot refusé. Pile vide mais entrée non vide\n")
-(*|(q, x, [])-> print_string ("mot refusé. Entrée vide mais pile non vide\n")*)
+
 |(q,x,m) -> let (_, tr) = autom in 
   let t' = find_transition (q,x,m) tr in 
   match t' with 
-  |None -> print_string("mot refusé. Pas de transition\n")
+  |None -> if m=[] then print_string 
+    ("mot refusé. Entrée vide mais pile non vide\n")
+  else print_string("mot refusé. Pas de transition\n")
   |Some t -> let app = apply_transition (q,x,m) t in 
    lecture_mot autom app
 ;;
