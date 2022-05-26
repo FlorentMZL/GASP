@@ -1,0 +1,16 @@
+# Projet de Programmation : Un interpréteur pour les automates à pile déterministes
+
+## Membres
+
+MAZELET Florent
+WALLISER Marie
+
+## Compilation
+
+```make```
+
+## Lancement
+
+```./parser -affiche    MonFichier          -> ré-affiche l'automate tel qu'il a été analysé.```
+```./parser -conforme   MonFicher           -> vérification de la bonne formation de l'automate.```
+```./parser -lit        MonFichier MonMot   -> teste si le mot est reconnu.```
