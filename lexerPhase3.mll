@@ -1,5 +1,5 @@
 {
-open Parser
+open ParserPhase3
 }
 
 let layout = [ ' ' '\t' '\n' ]
@@ -10,13 +10,12 @@ let lettres = [ 'a'-'z''A'-'Z''1'-'9' ]
 rule read = parse
   | layout		{ read lexbuf } (*on passe à la suite*)
   | "input symbols:"       { INPUTSYMB }
-  | "transitions:"         { TRANS }
   | "stack symbols:"       { STACKSYMB}
   | "states:"              { STATES}
   | "initial state:"       { INITSTATE }
   | "initial stack symbol:"{ INITSTACKSYMB }
   | "begin"                 { BEGIN }
-  | "program:"             { PROGRAM }
+  | "program"             { PROGRAM }
   | "state"                 { STATE }
   | "push"                  { PUSH }
   | "change"                { CHANGE}
@@ -27,7 +26,8 @@ rule read = parse
   | "of"                    { OF }
   | ","		                  { VIRGULE }
   | ":"                     { DEUXPOINTS }
-  | lettres as l            { LETTRE (l) }
-  | "end"                   { END }
+  |"reject"                 {REJECT}
+  |"end"                   { END }
+  | lettres as l            { LETTRE (l) } 
   | eof			                { EOF }
   | _			                  { failwith "unexpected character" }

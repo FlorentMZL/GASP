@@ -3,25 +3,24 @@ open Ast
 %}
 
 
-%token<string> STATE NEXT TOP 
-%token <string> CHANGE POP CASE PUSH 
-%token INPUTSYMB STACKSYMB STATES 
+%token STATE NEXT TOP 
+%token  CHANGE POP CASE PUSH BEGIN REJECT
+%token INPUTSYMB STACKSYMB STATES PROGRAM
 %token INITSTATE INITSTACKSYMB 
 %token VIRGULE DEUXPOINTS OF 
-%token TRANS 
-%token EOF END BEGIN
+%token EOF END 
 %token<char> LETTRE
 
-%start<Ast.automaton> input
+%start<Ast.program> input
 
 %%
 
-(*On veut renvoyer un objet de type automate*)
-input: c=automaton END EOF { c } 
+(*On veut renvoyer un objet de type Ast.program*)
+input: c=programF EOF { c } 
+(*type programF = declaration*expr *)
+programF : 
+    d = declarations p = program {(d,p)}
 
-(* type automaton = declaration*transitions *)
-automaton: 
-    d=declarations t=transitions  { (d, t) }
 
 (*type declaration = inputsymb*stacksymb*states*char*char *)
 declarations : 
@@ -48,29 +47,33 @@ suitelettresnonvide:
     |l=LETTRE                               { [l] }
     |l=LETTRE VIRGULE s=suitelettresnonvide { l::s } (* je crée une liste de char mais c'est peut etre pas bon*)
 
-(*type program = case ?*)
+
+
+
+
 program : 
-    |c = case {c}
+    |PROGRAM DEUXPOINTS i= instructionGlobal {i }
 
-case : 
-    |CASE i = situation OF l = instructionListe END { (i,l) } 
-
-instructionListe : 
-    |le=LETTRE DEUXPOINTS i = instruction s = instructionListe {(le, i)::s} 
-    | (*mettre un truc pour dire qu'il y a plus rien a ajouter dans la liste*)
+instructionGlobal : 
+    |CASE TOP OF c = topCase {TopCase c}
+    |CASE NEXT OF c = nextCase{NextCase c}
+    |CASE STATE OF c = stateCase{StateCase c}
+    |i = instruction {i}
 
 instruction : 
-    |BEGIN l= case {l}(*?*) 
-    |p = operation  l = LETTRE {(p,l)}
-    
+    |BEGIN i = instructionGlobal END {i}
+    |POP  {Pop}
+    |PUSH l = LETTRE {Push (l)}
+    |CHANGE l = LETTRE {Change (l)}
+    |REJECT {Reject}
+topCase :
+    |l = LETTRE DEUXPOINTS i = instruction c = topCase {(l,i)::c}
+    |{[]}    
 
+stateCase:
+    |l = LETTRE DEUXPOINTS i = instruction c = stateCase {(l,i)::c}
+    |{[]}
 
-situation : 
-    |s = STATE {s}
-    |s =NEXT {s}
-    |s =TOP {s}
-
- operation : 
-    |p = PUSH {p}
-    |p = CHANGE {p}
-    |p = POP {p}
+nextCase : 
+    |l = LETTRE DEUXPOINTS i = instruction c = nextCase {(l,i)::c}
+    |{[]}

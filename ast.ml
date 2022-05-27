@@ -5,17 +5,53 @@ type inputsymb = char list;;
 type states = char list;;
 type stack = char list;;
 type stacksymb = char list;;
-
-type declaration = inputsymb*stacksymb*states*char*char;;
 (*correspond à l'ordre des déclarations de l'exemple*)
 
 type trans= char*(char option)*char*char*stack;;
 type transitions = trans list;;
+type declaration = inputsymb*stacksymb*states*char*char;;
 
 type automaton = declaration*transitions;;
 
+(*types de la phase 3*)
+type stacksymb3 = char;;
+type inputsymb3=char;;
+type states3 = char;;
+
+
+
+
+(*type expr pour phase 3*)
+type expr = 
+  |TopCase of ((stacksymb3*expr)list)
+  |StateCase of ((states3*expr)list)
+  |NextCase of ((inputsymb3*expr)list)
+  |Push of stacksymb3
+  |Change of states3
+  |Pop
+  |Reject
+  
+type program = declaration*expr;;
+
+
 
 (**** Fonctions d'affichage ****)
+let rec afficheCas = function
+  |[]->""
+  |(s,e)::t-> (Char.escaped s) ^","^ expr_as_string e ^"\n"^afficheCas t ^"\n"
+
+
+(*Affichage d'une expression*)
+and  expr_as_string = function
+  |Pop ->"Pop"
+  |TopCase l-> afficheCas l
+  |StateCase l-> afficheCas l
+  |NextCase l -> afficheCas l
+  |Push(c) -> "Push "^ Char.escaped c
+  |Change (c)-> "Change "^Char.escaped c
+  |Reject -> "Reject"
+
+
 
 (* [a;b;c] est affiché comme : a, b, c *)
 let rec list_as_string = function 
@@ -72,7 +108,11 @@ let configuration_as_string = function
   "\nReste: "^(word_as_string word)^"\n"
 ;;
   
-
+(*Affichage d'un programme (phase 3), ne met pas les begin/end par construction du parser... pas très très utile mais bon*)
+let prg_as_string = function(d,e) 
+  -> declaration_as_string d^"\n"^ "Programme : \n\n"^
+  expr_as_string e
+;;
 (**** Fonction pour les listes ****)
 
 (* fonction pour convertir un mot en liste de char *)
@@ -210,4 +250,71 @@ let rec lecture_mot autom cf =
    lecture_mot autom app
 ;;
 
+(*Fonction de lecture de mot par programme*)
+let rec getStateCase l etat = 
+  match l with 
+  |(a,b)::t-> if a = etat then  (a,b) else getStateCase t etat
+  |[]-> failwith ("Pas d'état "^Char.escaped etat^"\n")
+;;
 
+(*pour trouver des couples (a,expr)*)
+let rec getNextCase l lettre = 
+  match l with 
+  |(a,b)::t-> if a = lettre then (a,b) else getNextCase t lettre
+  |[]-> failwith("Pas de lettre "^Char.escaped lettre ^"\n")
+;;
+
+let rec getTopCase l c = 
+  match l with 
+  |(a,b)::t -> if a = c then (a,b) else getTopCase t c
+  |[]-> failwith("pas d'etat de pile "^Char.escaped c^"\n")
+;;
+let print_etat_prog_lecture mot pile etat = 
+  List.iter (Printf.printf  "%c") mot;
+  print_string(";");
+  List.iter (Printf.printf  "%c") pile;
+  print_string(";");
+  print_string(Char.escaped etat);
+  print_string("\n");
+;;
+
+let rec lecture_mot_prog etat pile mot expres expresInit =
+  match (pile,mot) with 
+  |([],[]) -> print_string("mot accepté\n")
+  |_ -> begin match expres with 
+        |Pop-> (print_etat_prog_lecture mot pile etat);(*Si l'instruction est Pop : on apelle la fonction en dépilant*)
+              begin  match pile with 
+              |[] -> print_string ("mot refusé. Appel de Pop sur pile vide\n")
+              |_::t -> lecture_mot_prog etat t mot expresInit expresInit
+              end
+        |Push(s) -> (print_etat_prog_lecture mot pile etat);(*On empile s et on rapelle la fonction*)
+                    lecture_mot_prog etat (s::pile) mot expresInit expresInit
+        |Change (c) -> (print_etat_prog_lecture mot pile etat);(*On change l'état et on rapelle la fonction*)
+                      lecture_mot_prog c pile mot expresInit expresInit
+        |StateCase (l)-> (print_etat_prog_lecture mot pile etat);(*Si il y a des couples (etat, expr) alors on rapelle 
+         la fonction en changeant l'état et l'expr*)
+                        let (a,b) = getStateCase l etat in lecture_mot_prog etat pile mot b expresInit  
+        |NextCase (l)-> (print_etat_prog_lecture mot pile etat); 
+          begin 
+          match mot with 
+          |[]-> print_string("Mot refusé.Plus de lettre à consommer.\n")     
+          (*Si il y a un couple (lettre, expression) on rapelle en enlevant la lettre du mot et en changeant expr *) 
+          |h::t-> let (a,b) = getNextCase l h in lecture_mot_prog etat pile t b expresInit
+          end
+        |TopCase (l) -> begin
+          match pile with 
+          (*Si il y a un couple (symbole, expr)...*)
+          |h::t -> let (a,b) = getTopCase l h in lecture_mot_prog etat pile mot b expresInit
+          |[]-> print_string("Mot refusé. Pile vide")
+          end
+        |Reject -> print_string("Reject\n")
+      
+        end
+
+      ;;
+
+let lecture_mot_prog prog mot =
+  let (a,b) = prog in let (_,_,_,initstate,initStack) = a in lecture_mot_prog initstate [initStack] mot b b  
+  
+  
+;; 
