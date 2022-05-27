@@ -1,9 +1,11 @@
 
 let usage () = 
   print_string "usage : 
-  -affiche MonAutomate : ré-affiche l'automate tel qu'il a été analysé
+  -affiche1 MonAutomate : ré-affiche l'automate tel qu'il a été analysé
+  -affiche3 MonAutomate : ré-affiche l'automate/programme parsé depuis la grammaire de l'étape 3
   -conforme MonAutomate : vérification de la bonne formation de l'automate
-  -lit MonAutomate MonMot : teste si le mot est reconnu\n"
+  -lit1 MonAutomate MonMot : teste si le mot est reconnu
+  -lit3 MonAutomate MonMot : teste si le mot est reconnu depuis un automate de l'étape 3\n"
 ;;
 
 

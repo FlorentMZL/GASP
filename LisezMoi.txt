@@ -2,7 +2,7 @@
 
 ## Membres
 
-MAZELET Florent
+MAZELET Florent     flomazelet@gmail.com 21958561
 WALLISER Marie      marie.walliser@free.fr  21979046
 
 ## Compilation
@@ -15,6 +15,10 @@ WALLISER Marie      marie.walliser@free.fr  21979046
 ```./parser -conforme   MonFicher           -> vérification de la bonne formation de l'automate.```
 ```./parser -lit        MonFichier MonMot   -> teste si le mot est reconnu.```
 
+```./parser -affiche3    MonFichier          -> ré-affiche le programme tel qu'il a été analysé. ```
+```./parser -lit3        MonFichier MonMot   -> teste si le mot est reconnu.```
+
+-affiche3 n'est pas très utile car l'affichage du programme n'affiche pas les Begin et end car ils ne sont pas stockés. 
 
 ## Fonctionnalités implémentées
 
@@ -34,6 +38,7 @@ WALLISER Marie      marie.walliser@free.fr  21979046
 
 - analyse d'un automate décrit dans un fichier (parserPhase3.mly et lexerPhase3.mll)
 - interpréteur de l'arbre pour lire un mot
+-Il n'y a pas de vérification sur le programme comme nous devions les faire dans la partie 2
 
 ## Répartition du travail
 
