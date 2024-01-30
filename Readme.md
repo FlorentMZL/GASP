@@ -2,8 +2,8 @@
 
 ## Membres
 
-MAZELET Florent     flomazelet@gmail.com 21958561
-WALLISER Marie      marie.walliser@free.fr  21979046
+MAZELET Florent     
+WALLISER Marie      
 
 ## Compilation
 
